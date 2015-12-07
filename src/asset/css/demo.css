@@ -1,0 +1,42 @@
+
+
+.test {
+  background: black;
+  opacity: 1;
+  display: inline-block;
+  size:10px 10px;
+  color: rgba(68, 136, 73, 0.42);
+  float:left;
+}
+
+.test::after{
+  content:  '';
+}
+.foo {
+  clear: fix; /* IE8+ */
+}
+
+.bar {
+  clear: fix-legacy; /* IE6+ */
+}
+
+
+
+
+/* before */
+
+$blue: #056ef0;
+$column: 200px;
+
+.menu {
+    width: calc(4 * $column);
+}
+
+.menu_link {
+    background: $blue;
+    width: $column;
+
+    a{
+        width:100px;
+    }
+}
