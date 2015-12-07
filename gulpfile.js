@@ -9,7 +9,8 @@ var gulp = require('gulp'),
     revReplace = require('gulp-rev-replace'),
     rev_manifest_file_path = './rev-manifest.json';
 
-var port = 8089, isDeploy = !!0;
+var port = process.env.port || 5000,
+    isDeploy = !!0;
 
 //postcss plugin
 var autoprefixer = require('autoprefixer'),
