@@ -1,7 +1,6 @@
 var gulp = require('gulp'),
     $ = require('gulp-load-plugins')(),
     postcss = require('gulp-postcss'),
-    connect = require('gulp-connect'),
     webpack = require('webpack-stream'),
     named = require('vinyl-named'),
     del = require('del'),
@@ -47,7 +46,7 @@ var compile = {
  * live reload
  */
 gulp.task('connect', function () {
-    connect.server({
+    $.connect.server({
         port: port,
         livereload: true
     })
@@ -123,21 +122,21 @@ gulp.task('jade', function () {
  * Default task setting
  */
 gulp.task('default', ['connect'], function () {
-    gulp.watch(compile.src.html, function (event) {
-        gulp.run('jade');
-    });
-    gulp.watch('src/html/**', function (event) {
-        gulp.run('html');
-    });
-    gulp.watch('src/css/**', function (event) {
-        gulp.run('postcss');
-    });
-    gulp.watch('src/js/**', function (event) {
-        gulp.run('js');
-    });
-    gulp.watch('src/images/**/*', batch(function (events, done) {
-        gulp.start('images', done);
-    }));
+    //gulp.watch(compile.src.html, function (event) {
+    //    gulp.run('jade');
+    //});
+    //gulp.watch('src/html/**', function (event) {
+    //    gulp.run('html');
+    //});
+    //gulp.watch('src/css/**', function (event) {
+    //    gulp.run('postcss');
+    //});
+    //gulp.watch('src/js/**', function (event) {
+    //    gulp.run('js');
+    //});
+    //gulp.watch('src/images/**/*', batch(function (events, done) {
+    //    gulp.start('images', done);
+    //}));
 });
 
 
