@@ -2,10 +2,11 @@ var gulp = require('gulp'),
     $ = require('gulp-load-plugins')(),
     postcss = require('gulp-postcss'),
     webpack = require('webpack-stream'),
-    named = require('vinyl-named'),
+    webpackPlugin = require('webpack'),
     del = require('del'),
     rev = require('gulp-rev'),
     revReplace = require('gulp-rev-replace'),
+    glob = require('glob-all'),
     rev_manifest_file_path = './rev-manifest.json';
 
 var port = process.env.port || 5000,
@@ -23,6 +24,10 @@ var autoprefixer = require('autoprefixer'),
     precss = require('precss'),//支持  sass 语法
     cssNext = require('postcss-cssnext');
 
+//webpack plugin
+var PathRewriterPlugin = require('webpack-path-rewriter');
+
+
 var project_src_root = './src', project_compile_root = './dest'; //项目根目录  编译目录
 
 
@@ -37,7 +42,7 @@ var compile = {
         css: project_compile_root + '/asset/css/',
         html: project_compile_root + '/',
         asset: project_compile_root + '/asset/',
-        js: project_compile_root + '/asset/js/'
+        js: project_compile_root
     }
 };
 
@@ -85,11 +90,22 @@ gulp.task('postcss', function () {
  * webpack
  */
 gulp.task('webpack', function () {
-    return gulp.src(compile.src.entry)
-        .pipe(named())
+    var entrys = compile.src.entry;
+
+    function getEntry() {
+        var entry = {};
+        glob.sync(entrys).forEach(function (name) {
+            var outputfile = name.replace(project_src_root,'.').replace('.js','');
+            entry[outputfile] = name;
+        });
+        return entry;
+    }
+
+    return gulp.src(entrys)
         .pipe(webpack({
+            entry: getEntry(),
             output: {
-                filename: 'bundle.js'
+                filename: '[name].js'
             },
             module: {
                 loaders: [
@@ -102,7 +118,12 @@ gulp.task('webpack', function () {
             resolve: {
                 modulesDirectories:["node_modules","./src/asset/js/lib"]
             },
-            plugins: []
+            plugins: [
+                new webpackPlugin.optimize.CommonsChunkPlugin("commons.js"),
+                new webpackPlugin.ProvidePlugin({
+                    $: "jquery"
+                })
+            ]
         }))
         .pipe(gulp.dest(compile.dest.js));
 });
@@ -156,5 +177,5 @@ function errrHandler(e) {
  */
 function log(msg) {
     var dateStr = new Date().toISOString().replace(/T/, ' ').replace(/\..+/, '');
-    isLog ? console.log('[' + dateStr + '] : ' + msg) : ''
+    console.log('[' + dateStr + '] : ' + msg);
 }

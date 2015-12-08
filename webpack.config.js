@@ -1,30 +1,33 @@
 var glob = require('glob-all'),
-	webpackConfig;
+    webpackPlugin = require('webpack');
 
 
 
 
 
 ////获取多个模块入口文件
-//function getEntry(src) {
-//	 var entry = {};
-//    glob.sync(src + '/**/*.main.js').forEach(function (name) {
-//        entry[HTools.randomStr(8)] = name;
-//    });
-//    return entry;
-//}
+function getEntry(src) {
+	 var entry = {};
+    glob.sync(src + '/**/*.main.js').forEach(function (name) {
+        entry[name] = name;
+    });
+    return entry;
+}
 //
 
 module.exports = {
-    //entry:getEntry(),
-    module: {
-        loaders: [
-        ]
+    entry:getEntry('./src/asset/js'),
+    output: {
+        path:'./public',
+        filename: '[name].js'
     },
-    postcss:[
-        autoprefixer({ browsers: ['> 1%', 'IE 8']}),
-        opacity,
-        pseudoelements,
-        pixrem
+    resolve: {
+        modulesDirectories:["node_modules","./src/asset/js/lib"]
+    },
+    plugins: [
+        new webpackPlugin.optimize.CommonsChunkPlugin("commons.js"),
+        new webpackPlugin.ProvidePlugin({
+            $: "jquery"
+        })
     ]
 };
