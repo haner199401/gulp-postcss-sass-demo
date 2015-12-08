@@ -99,7 +99,9 @@ gulp.task('webpack', function () {
                     }
                 ]
             },
-            resolve: {},
+            resolve: {
+                modulesDirectories:["node_modules","./src/asset/js/lib"]
+            },
             plugins: []
         }))
         .pipe(gulp.dest(compile.dest.js));

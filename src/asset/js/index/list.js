@@ -1,1 +1,1 @@
-alert('list js');
+require('./config');alert('list js');

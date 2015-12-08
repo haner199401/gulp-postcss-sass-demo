@@ -5,9 +5,6 @@
 
 var config = require('config');
 
-console.log(config);
-
-
-
+config.IList = config.interfaceUrl('/xx/xxx');
 
 module.exports  = config;
