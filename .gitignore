@@ -2,3 +2,4 @@
 .idea
 *.html
 /dest
+.DS_Store
