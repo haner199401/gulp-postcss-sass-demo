@@ -12,6 +12,8 @@ var gulp = require('gulp'),
 var port = process.env.port || 5000,
     isDeploy = !!0;
 
+
+
 //postcss plugin
 var autoprefixer = require('autoprefixer'),
     color_rgba_fallback = require('postcss-color-rgba-fallback'), //rgba IE8降级处理
@@ -24,12 +26,17 @@ var autoprefixer = require('autoprefixer'),
     precss = require('precss'),//支持  sass 语法
     cssNext = require('postcss-cssnext');
 
+
+
+
 //webpack plugin
 var PathRewriterPlugin = require('webpack-path-rewriter');
 
 
-var project_src_root = './src', project_compile_root = './dest'; //项目根目录  编译目录
 
+
+
+var project_src_root = './src', project_compile_root = './dest'; //项目根目录  编译目录
 
 var compile = {
     src: {
@@ -45,6 +52,8 @@ var compile = {
         js: project_compile_root
     }
 };
+
+
 
 
 /**
