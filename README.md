@@ -1,2 +1,2 @@
-# mm
-美房美邦
+##npm i || cnpm i
+##npm run || cnpm run
