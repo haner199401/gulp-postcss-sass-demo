@@ -22,7 +22,7 @@ module.exports = {
         ]
     },
     postcss:[
-        autoprefixer({ browsers: ['> index%', 'IE 8']}),
+        autoprefixer({ browsers: ['> 1%', 'IE 8']}),
         opacity,
         pseudoelements,
         pixrem
