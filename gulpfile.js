@@ -2,16 +2,19 @@ var gulp = require('gulp'),
     $ = require('gulp-load-plugins')(),
     postcss = require('gulp-postcss'),
     webpack = require('webpack-stream'),
+    browserSync = require('browser-sync').create(),
     webpackPlugin = require('webpack'),
     del = require('del'),
     rev = require('gulp-rev'),
     revReplace = require('gulp-rev-replace'),
     glob = require('glob-all'),
-    rev_manifest_file_path = './rev-manifest.json';
+    path = require('path');
+
 
 var port = process.env.port || 5000,
-    isDeploy = !!0;
-
+    isDeploy = !!0,
+    node_modules_dir = path.join(__dirname, 'node_modules'),
+    rev_manifest_file_path = './rev-manifest.json';
 
 
 //postcss plugin
@@ -27,13 +30,8 @@ var autoprefixer = require('autoprefixer'),
     cssNext = require('postcss-cssnext');
 
 
-
-
 //webpack plugin
 var PathRewriterPlugin = require('webpack-path-rewriter');
-
-
-
 
 
 var project_src_root = './src', project_compile_root = './dest'; //项目根目录  编译目录
@@ -57,16 +55,6 @@ var compile = {
 
 
 /**
- * live reload
- */
-gulp.task('connect', function () {
-    $.connect.server({
-        port: port,
-        livereload: true
-    })
-});
-
-/**
  * del
  */
 gulp.task('clean', del.bind(null, ['dest']));
@@ -87,11 +75,23 @@ gulp.task('postcss', function () {
         cssNext,
         short
     ];
+
     return gulp.src(compile.src.css)
         .pipe(postcss(processors))
         .pipe($.if(isDeploy, $.csso()))
         .pipe($.if('*.css' && isDeploy, $.rename({suffix: '.min'})))
-        .pipe(gulp.dest(compile.dest.css));
+        .pipe(gulp.dest(compile.dest.css))
+        .pipe(browserSync.stream());
+
+});
+
+
+
+gulp.task('asset',function(){
+   return gulp.src([''])
+       .pipe(gulp.dest())
+       .pipe(browserSync.stream());
+
 });
 
 
@@ -104,37 +104,50 @@ gulp.task('webpack', function () {
     function getEntry() {
         var entry = {};
         glob.sync(entrys).forEach(function (name) {
-            var outputfile = name.replace(project_src_root,'.').replace('.js','');
+            var outputfile = name.replace(project_src_root, '.').replace('.js', '');
             entry[outputfile] = name;
         });
         return entry;
     }
 
+    /**
+     * webpack config
+     * @type {{entry: *, output: {filename: string}, resolve: {modulesDirectories: string[]}, plugins: *[]}}
+     */
+    var config = {
+        addVendor: function (name, path) {
+            this.resolve.alias[name] = path;
+            this.module.noParse.push(new RegExp(path));
+        },
+        entry: getEntry(),
+        output: {
+            filename: '[name].js'
+        },
+        resolve: {
+            modulesDirectories: ["node_modules", "lib"],
+            alias: {}
+        },
+        module: {
+            noParse: []
+        },
+        plugins: [
+            new webpackPlugin.optimize.CommonsChunkPlugin("commons.js"),
+            new webpackPlugin.ProvidePlugin({
+                $: "jquery",
+                jquery: "jQuery",
+                "windows.jQuery": "jquery"
+            })
+        ]
+    };
+
+    //无需解析文件
+    config.addVendor('jquery','jquery/dist/jquery.min.js');
+
     return gulp.src(entrys)
-        .pipe(webpack({
-            entry: getEntry(),
-            output: {
-                filename: '[name].js'
-            },
-            module: {
-                loaders: [
-                    {
-                        test: /\.((png)|(eot)|(woff)|(ttf)|(svg)|(gif))$/,
-                        loader: 'file?name=/[hash].[ext]'
-                    }
-                ]
-            },
-            resolve: {
-                modulesDirectories:["node_modules","./src/asset/js/lib"]
-            },
-            plugins: [
-                new webpackPlugin.optimize.CommonsChunkPlugin("commons.js"),
-                new webpackPlugin.ProvidePlugin({
-                    $: "jquery"
-                })
-            ]
-        }))
-        .pipe(gulp.dest(compile.dest.js));
+        .pipe(webpack(config))
+        .pipe(gulp.dest(compile.dest.js))
+        .pipe(browserSync.stream());
+
 });
 
 /**
@@ -147,28 +160,34 @@ gulp.task('jade', function () {
             pretty: true //不压缩
         }))
         .pipe(gulp.dest(compile.dest.html))
+        .pipe(browserSync.stream());
+
 });
 
 
 /**
+ * live reload
+ */
+gulp.task('server',['jade'],function() {
+
+    browserSync.init({
+        notify:false,
+        server: "./dest",
+        port: port
+    });
+
+    gulp.watch(compile.src.html,['jade']);
+    gulp.watch([compile.dest.html]).on('change', browserSync.reload);
+
+});
+
+/**
  * Default task setting
  */
-gulp.task('default', ['connect'], function () {
-    //gulp.watch(compile.src.html, function (event) {
-    //    gulp.run('jade');
-    //});
-    //gulp.watch('src/html/**', function (event) {
-    //    gulp.run('html');
-    //});
-    //gulp.watch('src/css/**', function (event) {
-    //    gulp.run('postcss');
-    //});
-    //gulp.watch('src/js/**', function (event) {
-    //    gulp.run('js');
-    //});
-    //gulp.watch('src/images/**/*', batch(function (events, done) {
-    //    gulp.start('images', done);
-    //}));
+gulp.task('default', ['server'], function () {
+    gulp.watch(compile.src.html, function (event) {
+        gulp.run('jade');
+    });
 });
 
 
