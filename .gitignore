@@ -2,4 +2,6 @@
 .idea
 *.html
 /dest
+/tmp
+/public
 .DS_Store
