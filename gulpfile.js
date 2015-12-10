@@ -14,7 +14,6 @@ var gulp = require('gulp'),
 
 var port = process.env.port || 5000,
     isDeploy = !!0,
-    onlyCopy = !!0,
     rev_manifest_file_path = './public/rev-manifest.json';
 
 
@@ -35,7 +34,7 @@ var autoprefixer = require('autoprefixer'),
 var PathRewriterPlugin = require('webpack-path-rewriter');
 
 
-var project_src_root = './src', project_compile_root = './tmp',project_plublic_root = './public'; //项目根目录  编译临时目录
+var project_src_root = './src', project_compile_root = './.tmp',project_plublic_root = './public'; //项目根目录  编译临时目录
 
 var compile = {
     src: {
@@ -60,7 +59,7 @@ var compile = {
 /**
  * Clean
  */
-gulp.task('clean', del.bind(null, ['tmp','public']));
+gulp.task('clean', del.bind(null, [project_compile_root,project_plublic_root]));
 
 
 /**
@@ -197,24 +196,22 @@ gulp.task('rev',['jade','scripts','assets','postcss'], function () {
 /**
  * Path replace
  */
-gulp.task("revreplace", onlyCopy ? [] : ["rev"], function(){
+gulp.task("revreplace",["rev"], function(){
     return gulp.src(compile.dest.html + '**/*.html')
         .pipe(revReplace({manifest: gulp.src(rev_manifest_file_path)}))
         .pipe(gulp.dest(project_plublic_root))
         .pipe(browserSync.stream());
 });
 
-
+var task = ['jade','scripts','assets','postcss'];
 /**
  * Server
  */
-gulp.task('server',['revreplace'], function () {
-
-    onlyCopy = false;
+gulp.task('server',isDeploy ? ['revreplace'] :task , function () {
 
     browserSync.init({
         notify: false,
-        server: project_plublic_root,
+        server: isDeploy ? project_plublic_root : project_compile_root,
         port: port
     });
 
