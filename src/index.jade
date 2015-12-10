@@ -1,9 +1,8 @@
-doctype html
-html(lang="en")
-    head
-        title pageTitle
-    body
-        h1 Jade - node template engine
-        #container.col
-            p.
-                你还是awdwd啊啊
+extends ./layout/layout
+
+block title
+    title 首页
+    link(href="./asset/css/a.css")
+
+block content
+    div wdadwdd

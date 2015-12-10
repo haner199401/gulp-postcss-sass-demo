@@ -1,12 +1,11 @@
 doctype html
-html(lang="en")
+html
     head
-        title fadaw
+        include ./mate
+        block title
+            //默认标题
+            title 美房美邦
     body
-        h1 Jade - node template engine
-        #container.col
-            p.
-                Jade is a terse and simple
-                templating language with a
-                strong focus on performance
-                and powerful features.
+        include ./header
+        block content
+        include ./footer

@@ -8,13 +8,14 @@ var gulp = require('gulp'),
     rev = require('gulp-rev'),
     revReplace = require('gulp-rev-replace'),
     glob = require('glob-all'),
-    path = require('path');
+    path = require('path'),
+    mergeStream = require('merge-stream');
 
 
 var port = process.env.port || 5000,
     isDeploy = !!0,
-    node_modules_dir = path.join(__dirname, 'node_modules'),
-    rev_manifest_file_path = './rev-manifest.json';
+    onlyCopy = !!0,
+    rev_manifest_file_path = './public/rev-manifest.json';
 
 
 //postcss plugin
@@ -34,33 +35,36 @@ var autoprefixer = require('autoprefixer'),
 var PathRewriterPlugin = require('webpack-path-rewriter');
 
 
-var project_src_root = './src', project_compile_root = './dest'; //项目根目录  编译目录
+var project_src_root = './src', project_compile_root = './tmp',project_plublic_root = './public'; //项目根目录  编译临时目录
 
 var compile = {
     src: {
         css: project_src_root + '/asset/css/**/*.css',
         html: project_src_root + '/**/*.jade',
-        asset: project_src_root + '/asset/',
-        entry: project_src_root + '/asset/js/*.main.js' //webpack 多页面入口文件
+        asset: [
+            project_src_root + '/asset/image/**/*',
+            project_src_root + '/asset/font/**/*'
+        ],
+        entry: project_src_root + '/asset/js/*.main.js', //webpack 多页面入口文件
+        js: project_src_root + '/asset/js/**/*' //js 文件
     },
     dest: {
         css: project_compile_root + '/asset/css/',
         html: project_compile_root + '/',
         asset: project_compile_root + '/asset/',
-        js: project_compile_root
+        js: project_compile_root + '/asset/js/' //js 文件
     }
 };
 
 
-
-
 /**
- * del
+ * Clean
  */
-gulp.task('clean', del.bind(null, ['dest']));
+gulp.task('clean', del.bind(null, ['tmp','public']));
+
 
 /**
- * postcss
+ * Postcss
  */
 gulp.task('postcss', function () {
     var processors = [
@@ -85,18 +89,20 @@ gulp.task('postcss', function () {
 
 });
 
-
-
-gulp.task('asset',function(){
-   return gulp.src([''])
-       .pipe(gulp.dest())
-       .pipe(browserSync.stream());
-
+/**
+ * Resource copy
+ *
+ */
+gulp.task('assets', function () {
+    return mergeStream.apply(null, compile.src.asset.map(function (glob) {
+        var path = glob.replace(/\/\*.*$/, '').replace(project_src_root, project_compile_root);
+        return gulp.src(glob).pipe(gulp.dest(path)).pipe(browserSync.stream());
+    }));
 });
 
-
 /**
- * webpack
+ * Webpack
+ *
  */
 gulp.task('webpack', function () {
     var entrys = compile.src.entry;
@@ -141,7 +147,7 @@ gulp.task('webpack', function () {
     };
 
     //无需解析文件
-    config.addVendor('jquery','jquery/dist/jquery.min.js');
+    config.addVendor('jquery', 'jquery/dist/jquery.min.js');
 
     return gulp.src(entrys)
         .pipe(webpack(config))
@@ -150,45 +156,97 @@ gulp.task('webpack', function () {
 
 });
 
+
+/**
+ * Javascript
+ *
+ */
+gulp.task('scripts', function () {
+    return gulp.src(compile.src.js)
+        .pipe($.plumber(errrHandler)) //异常处理
+        .pipe($.if(isDeploy && '*.js', $.uglify()))
+        .pipe(gulp.dest(compile.dest.js))
+        .pipe(browserSync.stream());
+});
+
 /**
  * Jade
  */
 gulp.task('jade', function () {
-    gulp.src(compile.src.html)
+    return gulp.src(compile.src.html)
         .pipe($.plumber(errrHandler)) //异常处理
         .pipe($.jade({
             pretty: true //不压缩
         }))
-        .pipe(gulp.dest(compile.dest.html))
-        .pipe(browserSync.stream());
-
+        .pipe(gulp.dest(compile.dest.html));
 });
 
 
 /**
- * live reload
+ * Reversion
+ *
  */
-gulp.task('server',['jade'],function() {
+gulp.task('rev',['jade','scripts','assets','postcss'], function () {
+    return gulp.src(compile.dest.asset + '**')
+        .pipe(rev())
+        .pipe(gulp.dest(project_plublic_root + '/asset'))
+        .pipe(rev.manifest({base: project_plublic_root,merge: true}))
+        .pipe(gulp.dest(project_plublic_root + '/asset'));
+});
+
+/**
+ * Path replace
+ */
+gulp.task("revreplace", onlyCopy ? [] : ["rev"], function(){
+    return gulp.src(compile.dest.html + '**/*.html')
+        .pipe(revReplace({manifest: gulp.src(rev_manifest_file_path)}))
+        .pipe(gulp.dest(project_plublic_root))
+        .pipe(browserSync.stream());
+});
+
+
+/**
+ * Server
+ */
+gulp.task('server',['revreplace'], function () {
+
+    onlyCopy = false;
 
     browserSync.init({
-        notify:false,
-        server: "./dest",
+        notify: false,
+        server: project_plublic_root,
         port: port
     });
 
+    /**
+     * 编译
+     */
     gulp.watch(compile.src.html,['jade']);
-    gulp.watch([compile.dest.html]).on('change', browserSync.reload);
+    gulp.watch(compile.src.css, ['postcss']);
+    gulp.watch(compile.src.js, ['scripts']);
+
+    /**
+     * 刷新
+     */
+    gulp.watch([compile.dest.html, compile.dest.css,compile.dest.js]).on('change', browserSync.reload);
 
 });
+
+
 
 /**
- * Default task setting
+ * Main
  */
-gulp.task('default', ['server'], function () {
-    gulp.watch(compile.src.html, function (event) {
-        gulp.run('jade');
-    });
-});
+gulp.task('default', ['server']);
+
+
+
+
+
+
+
+
+
 
 
 /**

@@ -1,0 +1,54 @@
+
+
+.test {
+  background: black;
+  opacity: 1;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=100)";
+  display: inline-block;
+  width: 10px;
+  height: 10px;
+  color: #448849;
+  color: rgba(68, 136, 73, 0.42);
+  float:left;
+}
+
+.test:after{
+  content:  '';
+}
+.foo:after {
+  content: '';
+  display: table;
+  clear: both;
+}
+.foo { /* IE8+ */
+}
+
+.bar:before, .bar:after {
+  content: '';
+  display: table;
+}
+
+.bar:after {
+  clear: both;
+}
+
+.bar { /* IE6+ */ zoom: 1;
+}
+
+
+
+
+/* before */
+
+.menu {
+    width: 800px;
+}
+
+.menu_link {
+    background: #056ef0;
+    width: 200px;
+}
+
+.menu_link a{
+  width:100px;
+}
