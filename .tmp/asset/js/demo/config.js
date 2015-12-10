@@ -1,1 +1,0 @@
-var config=require("config");config.IList=config.interfaceUrl("/xx/xxx"),config.IList=config.interfaceUrl("/xx/xxx"),module.exports=config;

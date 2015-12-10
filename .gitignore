@@ -2,6 +2,6 @@
 .idea
 *.html
 /dest
-/tmp
+/.tmp
 /public
 .DS_Store
