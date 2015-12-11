@@ -8,7 +8,6 @@ var gulp = require('gulp'),
     rev = require('gulp-rev'),
     revReplace = require('gulp-rev-replace'),
     glob = require('glob-all'),
-    path = require('path'),
     mergeStream = require('merge-stream');
 
 
@@ -27,6 +26,7 @@ var autoprefixer = require('autoprefixer'),
     clearFix = require('postcss-clearfix'),
     short = require('postcss-short'), //size :10px  => width:10px height:10px;     size :10px 20px  => width:10px height:20px;
     precss = require('precss'),//支持  sass 语法
+    cssImport = require('postcss-import'),//支持import css
     cssNext = require('postcss-cssnext');
 
 
@@ -76,7 +76,10 @@ gulp.task('postcss', function () {
         clearFix,
         precss,
         cssNext,
-        short
+        short,
+        cssImport({
+            path: [project_src_root + '/asset/css/']
+        })
     ];
 
     return gulp.src(compile.src.css)
@@ -211,7 +214,7 @@ var task = ['jade','scripts','assets','postcss'];
 gulp.task('server',isDeploy ? ['revreplace'] :task , function () {
 
     browserSync.init({
-        notify: false,
+        notify: true,
         server: isDeploy ? project_plublic_root : project_compile_root,
         port: port
     });
