@@ -27,6 +27,7 @@ var autoprefixer = require('autoprefixer'),
     short = require('postcss-short'), //size :10px  => width:10px height:10px;     size :10px 20px  => width:10px height:20px;
     precss = require('precss'),//支持  sass 语法
     cssImport = require('postcss-import'),//支持import css
+    sprites = require('postcss-sprites'),//sprites image
     cssNext = require('postcss-cssnext');
 
 
@@ -39,6 +40,7 @@ var project_src_root = './src', project_compile_root = './.tmp',project_plublic_
 var compile = {
     src: {
         css: project_src_root + '/asset/css/**/*.css',
+        cssAssets: project_src_root + '/asset/css',
         html: project_src_root + '/**/*.jade',
         asset: [
             project_src_root + '/asset/image/**/*',
@@ -62,6 +64,12 @@ var compile = {
 gulp.task('clean', del.bind(null, [project_compile_root,project_plublic_root]));
 
 
+var opts = {
+    stylesheetPath: compile.src.cssAssets,
+    spritePath    : compile.src.cssAssets + 'image/icon/sprite.png',
+    retina        : true
+};
+
 /**
  * Postcss
  */
@@ -79,7 +87,8 @@ gulp.task('postcss', function () {
         short,
         cssImport({
             path: [project_src_root + '/asset/css/']
-        })
+        }),
+        sprites(opts)
     ];
 
     return gulp.src(compile.src.css)
