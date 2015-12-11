@@ -72,22 +72,22 @@ var opts = {
     retina        : true
     },
     processors = [
-    autoprefixer({browsers: ['> 1%', 'IE 8']}),
-    color_rgba_fallback,
-    opacity,
-    pseudoelements,
-    pixrem,
-    csssimple,
-    //oldie,
-    clearFix,
-    precss,
-    cssNext,
-    short,
-    cssImport({
-        path: [project_src_root + '/asset/css/']
-    }),
-    sprites(opts)
-];
+        csssimple,
+        precss,
+        autoprefixer({browsers: ['> 1%', 'IE 8']}),
+        color_rgba_fallback,
+        opacity,
+        pseudoelements,
+        pixrem,
+        oldie,
+        clearFix,
+        cssNext,
+        short,
+        cssImport({
+            path: [project_src_root + '/asset/css/']
+        }),
+        sprites(opts)
+    ];
 /**
  * Postcss
  */
