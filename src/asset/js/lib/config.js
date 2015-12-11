@@ -1,4 +1,4 @@
-/**
+﻿/**
  * 配置说明
  * 静态页面跳转
  * 静态数据
@@ -51,7 +51,6 @@ config.tips = {
     nodata: '没有数据啦~',
     nomoredata: '没有更多数据啦~',
     loading: '加载中…',
-    locationerror:'定位失败,请手动选择城市！',
     noauth:'非法请求！',
     fileTypeError:'仅支持jpg、jpeg、png格式！'
 };
@@ -85,5 +84,3 @@ config.createPageUrl = createPageUrl;
 config.interfaceUrl = function(url){
     return config.interfaceServer + url + config.interfaceSuffix;
 };
-
-module.exports  = config;

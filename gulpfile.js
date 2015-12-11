@@ -177,7 +177,8 @@ gulp.task('jade', function () {
         .pipe($.jade({
             pretty: true //不压缩
         }))
-        .pipe(gulp.dest(compile.dest.html));
+        .pipe(gulp.dest(compile.dest.html))
+        .pipe(browserSync.stream());
 });
 
 

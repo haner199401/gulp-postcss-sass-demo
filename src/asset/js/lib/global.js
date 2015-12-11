@@ -5,42 +5,6 @@ var log = function (msg) {
     }
 };
 
-//Dialog Type
-var DialogType = {
-    confirm: 'confirm',
-    tip: 'tip'
-};
-
-/**
- * calc font-size
- */
-(function (doc, win) {
-
-    var docEl = doc.documentElement,
-        resizeEvt = 'orientationchange' in window ? 'orientationchange' : 'resize',
-        maxDevicewidth = 480, //最大设备宽度
-        recalc = function () {
-            var clientWidth = docEl.clientWidth;
-            if (!clientWidth) {
-                log('documentElement.clientWidth is undefined!');
-                return;
-            }
-            if (clientWidth >= maxDevicewidth) {
-                clientWidth = maxDevicewidth;
-            }
-            docEl.style.fontSize = 20 * (clientWidth / 320) + 'px';
-        };
-    //方便计算
-    win.px2rem = function (px) {
-        return px / 20 / 2;
-    };
-
-    if (!doc.addEventListener) return;
-    win.addEventListener(resizeEvt, recalc, false);
-    doc.addEventListener('DOMContentLoaded', recalc, false);
-})(document, window);
-
-
 // Ajax Tools
 var Ajax = (function(){
 
@@ -63,8 +27,7 @@ var Ajax = (function(){
          */
 
         pageRequest: function (data, callback, callbackDone) {
-            var renderFor = data.renderFor || 'wu-list-tmpl', renderEle = data.renderEle || '#wu-list',
-                clear = data.clear || 'true',
+            var renderFor = data.renderFor || 'list-tmpl', renderEle = data.renderEle || '#list',
                 pageParam = {pageSize:config.pageSize,page:config.page};
 
             var next = $('.wlist_next'), nextStr = '<a class="wlist_next">更多</a>';
@@ -169,7 +132,7 @@ var Ajax = (function(){
          *            ajax请求成功后最后执行的方法
          */
         queryRecord: function (data, callback, callbackDone, callbackError) {
-            var renderFor = data.renderFor || 'wu-detail-tmpl', renderEle = data.renderEle || '#wu-detail';
+            var renderFor = data.renderFor || 'detail-tmpl', renderEle = data.renderEle || '#detail';
 
             $.ajax({
                 url: data.url,
@@ -310,8 +273,8 @@ var Ajax = (function(){
                 },
                 type: data.type || 'GET',
                 dataType:'json',
-                beforeSend:showLoadingLayer,
-                headers:setHeader(data.data)
+                beforeSend:showLoadingLayer
+                
             }).then(function (response, textStatus, jqXHR) {
 
                 // error filter
@@ -349,59 +312,6 @@ var Ajax = (function(){
             }).always(function(){
                 hideLoadingLayer();
                 bindValid();
-            });
-        },
-        /**
-         * 获取系统字典数据
-         * @param data
-         * @param callback
-         * @param callbackError
-         */
-        getDictionary: function (data, callback, callbackError) {
-            var renderFor = data.renderFor, renderEle = data.renderEle;
-
-            $.ajax({
-                url: data.url,
-                data: {
-                    jsonData:JSON.stringify(data.data)
-                },
-                type:'GET',
-                dataType:'json',
-                beforeSend:showLoadingLayer
-            }).then(function (response, textStatus, jqXHR) {
-                bindValid();
-
-                if(!response || !response.code || response.code !== '0'){
-                    Tools.toast(response.desc || config.tips.server);
-                }
-
-                if ($('#' + renderFor).length) {
-                    try{
-                        var result = template.render(renderFor, {'list': response.data[0].values || []});
-                        $(renderEle).html(result);
-                    }catch (e){
-                        Tools.toast(response.desc || config.tips.server);
-                    }
-
-                }
-
-                if (typeof callback == 'function') {
-                    callback(response.data[0].values);
-                }
-
-
-            }).fail(function (jqXHR, textStatus, errorThrown) {
-                log('[getDictionary] ' + textStatus + ':' + data.url);
-                if (textStatus === 'timeout') {
-                    Tools.toast(config.tips.timeout);
-                } else {
-                    Tools.toast(config.tips.server);
-                }
-                if ($.isFunction(callbackError)) {
-                    callbackError();
-                }
-            }).always(function(){
-                hideLoadingLayer();
             });
         }
     };
@@ -648,30 +558,6 @@ var Tools = (function () {
             });
 
 
-        },
-
-        // toast
-        toast: function (msg, callback,tick) {
-            toastPanel = toastPanel || $('#wu-toast');
-            tick = tick || 1000;
-
-            if (delay) {
-                clearTimeout(delay);
-            }
-
-            toastPanel.find('span').text(msg);
-            toastPanel.fadeIn();
-            delay = setTimeout(function () {
-                toastPanel.fadeOut();
-                if($.isFunction(callback)) callback();
-            }, tick);
-        },
-        //获取 微信 UA
-        isMicorMessage:function(){
-            var UA = navigator.userAgent,
-                res = {};
-            res[/android/.test(UA)? 'isAndroid' :(/iphone/.test(UA) ?'isIphone':'')] = true;
-            return res;
         }
     };
 })();
@@ -679,11 +565,11 @@ var Tools = (function () {
 // 本地存储
 var Storage = (function() {
     return {
-        AUTH : 'WORLDUNION_AUTH',
-        ACCOUNT : 'WORLDUNION_ACCOUNT',
-        REMEMBER : 'WORLDUNION_REMEMBER',
-        OPENID : 'WORLDUNION_OPENID',
-        CITY:'WORLDUNION_CITY',
+        AUTH : 'MM_AUTH',
+        ACCOUNT : 'MM_ACCOUNT',
+        REMEMBER : 'MM_REMEMBER',
+        OPENID : 'MM_OPENID',
+        CITY:'MM_CITY',
         get : function(key, isSession) {
             if (!Storage.isLocalStorage()) {
                 return;
@@ -758,6 +644,10 @@ var UserService = {
     }
 };
 
+
+
+
+
 // 扩展Date的format方法
 Date.prototype.format = function (format) {
     var o = {
@@ -792,6 +682,7 @@ String.prototype.isSpaces = function () {
     }
     return true;
 };
+
 
 String.prototype.isValidMail = function () {
     return (new RegExp(
