@@ -30,8 +30,8 @@ var autoprefixer = require('autoprefixer'),
     cssNext = require('postcss-cssnext');
 
 
-//webpack plugin
-var PathRewriterPlugin = require('webpack-path-rewriter');
+////webpack plugin
+//var PathRewriterPlugin = require('webpack-path-rewriter');
 
 
 var project_src_root = './src', project_compile_root = './.tmp',project_plublic_root = './public'; //项目根目录  编译临时目录
