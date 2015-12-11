@@ -19,15 +19,17 @@ var port = process.env.port || 5000,
 //postcss plugin
 var autoprefixer = require('autoprefixer'),
     color_rgba_fallback = require('postcss-color-rgba-fallback'), //rgba IE8降级处理
+    pixrem = require('pixrem'), //rem 转换
     opacity = require('postcss-opacity'),// 透明度 IE 降级处理
     pseudoelements = require('postcss-pseudoelements'),//伪元素处理
-    pixrem = require('pixrem'),// rem 2 px IE降级
     csssimple = require('postcss-csssimple'),//IE 部分hack 处理
     clearFix = require('postcss-clearfix'),
     short = require('postcss-short'), //size :10px  => width:10px height:10px;     size :10px 20px  => width:10px height:20px;
     precss = require('precss'),//支持  sass 语法
     cssImport = require('postcss-import'),//支持import css
     sprites = require('postcss-sprites'),//sprites image
+    oldie = require('oldie'),//old ie
+    scss = require('postcss-scss'),//scss
     cssNext = require('postcss-cssnext');
 
 
@@ -68,31 +70,30 @@ var opts = {
     stylesheetPath: compile.src.cssAssets,
     spritePath    : compile.src.cssAssets + 'image/icon/sprite.png',
     retina        : true
-};
-
+    },
+    processors = [
+    autoprefixer({browsers: ['> 1%', 'IE 8']}),
+    color_rgba_fallback,
+    opacity,
+    pseudoelements,
+    pixrem,
+    csssimple,
+    //oldie,
+    clearFix,
+    precss,
+    cssNext,
+    short,
+    cssImport({
+        path: [project_src_root + '/asset/css/']
+    }),
+    sprites(opts)
+];
 /**
  * Postcss
  */
 gulp.task('postcss', function () {
-    var processors = [
-        autoprefixer({browsers: ['> 1%', 'IE 8']}),
-        color_rgba_fallback,
-        opacity,
-        pseudoelements,
-        pixrem,
-        //csssimple,
-        clearFix,
-        precss,
-        cssNext,
-        short,
-        cssImport({
-            path: [project_src_root + '/asset/css/']
-        }),
-        sprites(opts)
-    ];
-
     return gulp.src(compile.src.css)
-        .pipe(postcss(processors))
+        .pipe(postcss(processors,{synax:scss}))
         .pipe($.if(isDeploy, $.csso()))
         .pipe($.if('*.css' && isDeploy, $.rename({suffix: '.min'})))
         .pipe(gulp.dest(compile.dest.css))
