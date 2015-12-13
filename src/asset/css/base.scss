@@ -1,0 +1,9 @@
+
+$font-stack: Helvetica, sans-serif;
+$primary-color: #fff;
+
+body {
+  font: 30px $font-stack;
+  background: $primary-color;
+  line-height: 30px;
+}

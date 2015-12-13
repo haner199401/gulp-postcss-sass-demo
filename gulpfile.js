@@ -8,6 +8,7 @@ var gulp = require('gulp'),
     rev = require('gulp-rev'),
     revReplace = require('gulp-rev-replace'),
     glob = require('glob-all'),
+    sourcemaps = require('gulp-sourcemaps'),
     mergeStream = require('merge-stream');
 
 
@@ -25,11 +26,9 @@ var autoprefixer = require('autoprefixer'),
     csssimple = require('postcss-csssimple'),//IE 部分hack 处理
     clearFix = require('postcss-clearfix'),
     short = require('postcss-short'), //size :10px  => width:10px height:10px;     size :10px 20px  => width:10px height:20px;
-    precss = require('precss'),//支持  sass 语法
     cssImport = require('postcss-import'),//支持import css
     sprites = require('postcss-sprites'),//sprites image
-    oldie = require('oldie'),//old ie
-    scss = require('postcss-scss'),//scss
+    sass = require('gulp-sass'),
     cssNext = require('postcss-cssnext');
 
 
@@ -41,7 +40,7 @@ var project_src_root = './src', project_compile_root = './.tmp',project_plublic_
 
 var compile = {
     src: {
-        css: project_src_root + '/asset/css/**/*.css',
+        css: project_src_root + '/asset/css/**/*',
         cssAssets: project_src_root + '/asset/css',
         html: project_src_root + '/**/*.jade',
         asset: [
@@ -72,14 +71,12 @@ var opts = {
     retina        : true
     },
     processors = [
-        csssimple,
-        precss,
         autoprefixer({browsers: ['> 1%', 'IE 8']}),
         color_rgba_fallback,
         opacity,
         pseudoelements,
         pixrem,
-        oldie,
+        //csssimple,
         clearFix,
         cssNext,
         short,
@@ -93,9 +90,12 @@ var opts = {
  */
 gulp.task('postcss', function () {
     return gulp.src(compile.src.css)
-        .pipe(postcss(processors,{synax:scss}))
-        .pipe($.if(isDeploy, $.csso()))
-        .pipe($.if('*.css' && isDeploy, $.rename({suffix: '.min'})))
+        .pipe(sourcemaps.init())
+        .pipe($.if('*.scss',sass().on('error', sass.logError)))
+        .pipe(postcss(processors))
+        .pipe($.csso())
+        .pipe($.if('*.css', $.rename({suffix: '.min'})))
+        .pipe(sourcemaps.write('./maps'))
         .pipe(gulp.dest(compile.dest.css))
         .pipe(browserSync.stream());
 
