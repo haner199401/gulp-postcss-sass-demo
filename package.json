@@ -1,12 +1,12 @@
 {
-  "name": "mm",
+  "name": "gulp-postcss-sass-demo",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
   "scripts": {
     "run": "gulp"
   },
-  "author": "",
+  "author": "Haner",
   "license": "ISC",
   "dependencies": {
     "gulp": "^3.9.0",
