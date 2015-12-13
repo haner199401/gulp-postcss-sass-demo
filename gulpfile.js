@@ -36,7 +36,7 @@ var autoprefixer = require('autoprefixer'),
 //var PathRewriterPlugin = require('webpack-path-rewriter');
 
 
-var project_src_root = './src', project_compile_root = './.tmp',project_plublic_root = './public'; //项目根目录  编译临时目录
+var project_src_root = './src', project_compile_root = './.tmp',project_plublic_root = './public'; //项目根目录 发布目录
 
 var compile = {
     src: {
@@ -230,14 +230,14 @@ gulp.task('server',isDeploy ? ['revreplace'] :task , function () {
     });
 
     /**
-     * 编译
+     * watch
      */
     gulp.watch(compile.src.html,['jade']);
     gulp.watch(compile.src.css, ['postcss']);
     gulp.watch(compile.src.js, ['scripts']);
 
     /**
-     * 刷新
+     * reload
      */
     gulp.watch([compile.dest.html, compile.dest.css,compile.dest.js]).on('change', browserSync.reload);
 
